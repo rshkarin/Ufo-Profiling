@@ -1,0 +1,13 @@
+prefix=@UFOART_PKG_PREFIX@
+exec_prefix=@UFOART_PKG_EXEC_PREFIX@
+libdir=@UFOART_PKG_LIBDIR@
+includedir=@UFOART_PKG_INCLUDEDIR@
+girdir=@UFOART_PKG_GIRDIR@
+typelibdir=@UFOART_PKG_TYPELIBDIR@
+
+Name: @TARNAME@
+Description: @UFOART_DESCRIPTION_SUMMARY@
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lufoart
+Cflags: -I${includedir}
+Requires: glib-2.0 gobject-2.0 ufo

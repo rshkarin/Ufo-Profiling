@@ -1,0 +1,3 @@
+build/
+cmake-temp/
+*.DS_Store
