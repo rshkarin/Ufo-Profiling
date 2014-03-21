@@ -5,28 +5,23 @@ FOLDER_NAME="$2"
 USE_GOOGLE_DRIVE="$3"
 USE_DROPBOX="$4"
 GPU_PREFIX="$5"
+PKG_FOLDER="$6"
 
-UFO_DIR_PATH="${HOME}/ufo-profiling-package"
+UFO_DIR_PATH="${HOME}"/"$PKG_FOLDER"
 UFO_FRAMEWORK_PATH="$UFO_DIR_PATH"/"ufo-framework"
 UFO_PROFILING_PATH="${HOME}"/"ufo-profilig-data"
 PROFILING_RAW_DATA_PATH="$UFO_PROFILING_PATH"/"profiling-raw-data"
 PROFILING_DATA_PATH="$UFO_PROFILING_PATH"/"profiling-processed-data"
 PROFILING_LOCAL_FOLDER="profiling-data"
 UFO_LIB_PATH="${HOME}/ufo-local-profiling"
-#PY_PATH="$UFO_DIR_PATH"/"python"
-#PY_PATH="$HOME/.local"
 PY_PATH="${HOME}/.local/lib/python2.7/site-packages:${HOME}/.local/lib64/python2.7/site-packages"
 UPLOADER_SCRIPT_PATH="$UFO_DIR_PATH"/"uploaders"
 PROCESSING_SCRIPT_PATH="$UFO_DIR_PATH"/"processing"
 METHOD_PATH="$UFO_DIR_PATH"/"methods"
 METHOD_TITLES=( "ufo-test-scheduler-bp" "ufo-test-scheduler-dfi-os1" "ufo-test-scheduler-dfi-os2" )
 UFO_PACKAGES=( "ufo-core" "ufo-art" "ufo-filters" )
-#GRAPHS_PATH="graphics"
-#SPREADSHEETS_PATH="spreadsheets"
 TIMINGS_PATH="timings"
 TEMP_FOLDER_NAME="tmp"
-#GRAPH_FILE_NAME="graph.svg"
-#SPREADSHEET_FILE_NAME="result.csv"
 
 #removing subsystem and pull last versions
 for UFO_PACKAGE in "${UFO_PACKAGES[@]}"; do
@@ -35,7 +30,7 @@ for UFO_PACKAGE in "${UFO_PACKAGES[@]}"; do
   fi
   
   cd "$UFO_FRAMEWORK_PATH"/"$UFO_PACKAGE"
-  git pull
+  git fetch
 done
 
 #set evn variables
@@ -81,14 +76,6 @@ fi
 mkdir -p "$PROFILING_RAW_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"
 mkdir -p "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"
 
-#if [ ! -d "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GRAPHS_PATH" ]; then
-#  mkdir -p "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GRAPHS_PATH"
-#fi
-
-#if [ ! -d "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH" ]; then
-#  mkdir -p "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"
-#fi
-
 #copy profiling result of each method to "$PROFILING_RAW_DATA_PATH"
 for METHOD_TITLE in "${METHOD_TITLES[@]}"; do
   RECENT_FILE=$(ls -A -t "$METHOD_PATH"/"$METHOD_TITLE"/build | grep '.opencl' | head -n 1)
@@ -103,12 +90,6 @@ done
 
 wait
 
-#draw plot
-#python "$PROCESSING_SCRIPT_PATH"/graph_plot.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH" -o "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GRAPHS_PATH"/"$GRAPH_FILE_NAME"
-
-#create spreadsheet
-#python "$PROCESSING_SCRIPT_PATH"/create_spreadsheet.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH" -o "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"/"$SPREADSHEET_FILE_NAME"
-
 DATA_FILES=( $(ls "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME" | grep '.txt') )
 
 #upload files to local storage
@@ -116,25 +97,16 @@ for FILE in "${DATA_FILES[@]}"; do
   bash "$UPLOADER_SCRIPT_PATH"/local-uploader.sh "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"/"$FILE" "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"
 done
 
-#bash "$UPLOADER_SCRIPT_PATH"/local-uploader.sh "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GRAPHS_PATH"/"$GRAPH_FILE_NAME" "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$GRAPHS_PATH"
-#bash "$UPLOADER_SCRIPT_PATH"/local-uploader.sh "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"/"$SPREADSHEET_FILE_NAME" "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"
-
 #upload files to goole drive
-#if [ "$USE_GOOGLE_DRIVE" == "YES" ]; then
-#  for FILE in "${DATA_FILES[@]}"; do
-#    python "$UPLOADER_SCRIPT_PATH"/"google-drive"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GPU_NAME"/"$FILE" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$GPU_NAME"
-#  done
-#
-#  python "$UPLOADER_SCRIPT_PATH"/"google-drive"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GRAPHS_PATH"/"$GRAPH_FILE_NAME" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$GRAPHS_PATH"
-#  python "$UPLOADER_SCRIPT_PATH"/"google-drive"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"/"$SPREADSHEET_FILE_NAME" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"
-#fi
+if [ "$USE_GOOGLE_DRIVE" == "YES" ]; then
+  for FILE in "${DATA_FILES[@]}"; do
+    python "$UPLOADER_SCRIPT_PATH"/"google-drive"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"/"$FILE" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"
+  done
+fi
 
 #upload files to dropbox
-#if [ "$USE_DROPBOX" == "YES" ]; then
-#  for FILE in "${DATA_FILES[@]}"; do
-#    python "$UPLOADER_SCRIPT_PATH"/"dropbox"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GPU_NAME"/"$FILE" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$GPU_NAME"
-#  done
-#
-#  python "$UPLOADER_SCRIPT_PATH"/"dropbox"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$GRAPHS_PATH"/"$GRAPH_FILE_NAME" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$GRAPHS_PATH"
-#  python "$UPLOADER_SCRIPT_PATH"/"dropbox"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"/"$SPREADSHEET_FILE_NAME" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$SPREADSHEETS_PATH"
-#fi
+if [ "$USE_DROPBOX" == "YES" ]; then
+  for FILE in "${DATA_FILES[@]}"; do
+    python "$UPLOADER_SCRIPT_PATH"/"dropbox"/uploader.py -i "$PROFILING_DATA_PATH"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"/"$FILE" -o "$PROFILING_LOCAL_FOLDER"/"$FOLDER_NAME"/"$TIMINGS_PATH"/"$GPU_NAME"
+  done
+fi

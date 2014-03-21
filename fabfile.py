@@ -1,13 +1,12 @@
 import os
 from datetime import datetime
 
-from fabric.api import env
+from fabric.api import env, execute
 from fabric.utils import puts
 from fabric.operations import run, put, local
 from fabric import colors
 import fabric.network
 import fabric.state
-
 
 YAML_AVAILABLE = True
 try:
@@ -37,7 +36,7 @@ def _load_config(**kwargs):
 
     """
     config, ext = os.path.splitext(kwargs.get('config',
-        'config.yaml' if os.path.exists('config.yaml') else 'config.json'))
+        'server_config.yaml' if os.path.exists('config.yaml') else 'config.json'))
 
     if not os.path.exists(config + ext):
         print colors.red('Error. "%s" file not found.' % (config + ext))
@@ -136,18 +135,24 @@ def _setup(task):
 current_time_stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 @_setup
-def copy_to_hosts():
-    run('rm -rf {0}'.format(os.path.join('~', env['package-name'])))
-    put(env['package-name'], '~')
-    run('bash {0} {1} {2} {3} {4}'.format(os.path.join('~', env['package-name'], env['profiling-script']), 
-					  env.gpu.replace(' ','_'), 
-					  current_time_stamp, 
-					  'NO', 
-					  'NO', 
-					  env.option))
-@host('locallost')
+def execute_methods():
+    for i in range(0, len(env.gpus)):
+        remote_pkg_path = os.path.join('~',env['package-names'][i])
+	run('rm -rf {0}'.format(remote_pkg_path))
+	run('mkdir -p {0}'.format(remote_pkg_path))
+	put(os.path.join(env['local-package-name'],'*'), remote_pkg_path)
+	run('bash {0} {1} {2} {3} {4} {5} {6}'.format(os.path.join(remote_pkg_path, env['profiling-script']), 
+					      env.gpus[i].replace(' ','_'), 
+					      current_time_stamp, 
+					      env['upload-google-drive'], 
+					      env['upload-dropbox'], 
+					      env.prefixes[i],
+					      env['package-names'][i]))
 def generate_data():
-    local('bash {0} {1}'.format(env['generate-script'], current_time_stamp))
-    
-print colors.green('Profiling has been finished!')
-    
+    if env.host == 'localhost':
+        local('bash {0} {1}'.format(env['generate-script'], current_time_stamp))
+        
+def start_profiling():
+    execute(execute_methods)
+    execute(generate_data)
+    print colors.green('Profiling has been finished!')
