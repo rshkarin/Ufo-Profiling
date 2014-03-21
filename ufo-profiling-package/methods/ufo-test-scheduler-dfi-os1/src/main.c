@@ -33,7 +33,7 @@ int main(int n_args, char *argv[])
   UfoNode *region_of_interest;
   UfoNode *backproject;
   UfoNode *filter;
-  //UfoNode *writer;
+  UfoNode *writer;
   g_type_init ();
 
   ufo_task_graph = ufo_task_graph_new();
@@ -104,12 +104,10 @@ int main(int n_args, char *argv[])
 		"width", 1311,
 		"height", 1331,
                 NULL);
-  /*
-  writer = ufo_plugin_manager_get_task (ufo_plugin_manager, "writer", &error);
-  g_object_set (G_OBJECT (writer),
-                "filename", "out-%05i.tif",
-                NULL);
-  */
+  
+  writer = ufo_plugin_manager_get_task (ufo_plugin_manager, "null", &error);
+  g_object_set (G_OBJECT (writer), NULL);
+  
   ufo_graph_connect_nodes (ufo_task_graph, reader, cut_sinogram, NULL);
   ufo_graph_connect_nodes (ufo_task_graph, cut_sinogram, zeropadding, NULL);
   ufo_graph_connect_nodes (ufo_task_graph, zeropadding, fft, NULL);
@@ -118,7 +116,7 @@ int main(int n_args, char *argv[])
   ufo_graph_connect_nodes (ufo_task_graph, swap_quadrants, ifft, NULL);
   ufo_graph_connect_nodes (ufo_task_graph, ifft, swap_quadrants_inverse, NULL);
   ufo_graph_connect_nodes (ufo_task_graph, swap_quadrants_inverse, region_of_interest, NULL);
-  //ufo_graph_connect_nodes (ufo_task_graph, region_of_interest, writer, NULL);
+  ufo_graph_connect_nodes (ufo_task_graph, region_of_interest, writer, NULL);
 
   ufo_scheduler_run (ufo_scheduler, ufo_task_graph, &error);
   if (error) printf("\nError: Run was unsuccessful: %s\n", error->message);
@@ -127,7 +125,7 @@ int main(int n_args, char *argv[])
   g_object_unref (ufo_scheduler);
   g_object_unref (ufo_plugin_manager);
 
-  //g_object_unref (writer);
+  g_object_unref (writer);
   g_object_unref (cut_sinogram);
   g_object_unref (zeropadding);
   g_object_unref (fft);
