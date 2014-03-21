@@ -1,0 +1,38 @@
+{
+  "localhost": {
+    "host": "localhost",
+    "gpu": "NVIDIA GeForce GTX TITAN",
+    "option": "",
+    "user": "rshkarin",
+    "package-name": "ufo-profiling-package",
+    "profiling-script": "ufo-installation.sh",
+    "generate-script": "generate-stuff.sh"
+  },
+  "ipepdvcompute1": {
+    "host": "ipepdvcompute1",
+    "gpu": "NVIDIA GeForce GTX 680",
+    "option": "CUDA_VISIBLE_DEVICES=0",
+    "user": "rshkarin",
+    "package-name": "ufo-profiling-package",
+    "profiling-script": "ufo-installation.sh",
+    "generate-script": "generate-stuff.sh"
+  },
+  "ipepdvcompute2": {
+    "host": "ipepdvcompute2",
+    "gpu": "NVIDIA GeForce GTX TITAN",
+    "option": "CUDA_VISIBLE_DEVICES=2",
+    "user": "rshkarin",
+    "package-name": "ufo-profiling-package",
+    "profiling-script": "ufo-installation.sh",
+    "generate-script": "generate-stuff.sh"
+  },
+  "ipepdvcompute3": {
+    "host": "ipepdvcompute3",
+    "gpu": "AMD Radeon R9 290 Series",
+    "option": "COMPUTE=:0",
+    "user": "rshkarin",
+    "package-name": "ufo-profiling-package",
+    "profiling-script": "ufo-installation.sh",
+    "generate-script": "generate-stuff.sh"
+  }
+}
