@@ -7,6 +7,8 @@ import textwrap
 import argparse
 import math
 import os
+import matplotlib
+matplotlib.use('qt4agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
